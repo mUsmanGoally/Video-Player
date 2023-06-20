@@ -10,4 +10,9 @@
     <string name="about">About</string>
     <string name="exit">Exit</string>
     <string name="welcome_to_world_of_entertainment">Welcome to \nWorld of Entertainment!!</string>
+    <string name="image">Image</string>
+    <string name="video_name">Video Name</string>
+    <string name="folder_name">Folder Name</string>
+    <string name="duration">00:00</string>
+    <string name="total_videos">Total Videos: 250</string>
 </resources>
