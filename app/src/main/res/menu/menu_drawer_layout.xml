@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:icon="@drawable/ic_feedback"
+        android:orderInCategory="1"
+        android:title="@string/feedback" />
+
+    <item
+        android:icon="@drawable/ic_theme"
+        android:orderInCategory="2"
+        android:title="@string/themes" />
+
+    <item
+        android:icon="@drawable/ic_sort_order"
+        android:orderInCategory="3"
+        android:title="@string/sort_order" />
+
+    <item
+        android:icon="@drawable/ic_about"
+        android:orderInCategory="4"
+        android:title="@string/about" />
+
+    <item
+        android:icon="@drawable/ic_exit"
+        android:orderInCategory="5"
+        android:title="@string/exit" />
+
+</menu>

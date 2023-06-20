@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Video Player</string>
+    <string name="all_videos">All Videos</string>
+    <string name="all_folders">All Folders</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="feedback">Feedback</string>
+    <string name="themes">Themes</string>
+    <string name="sort_order">Sort Order</string>
+    <string name="about">About</string>
+    <string name="exit">Exit</string>
+    <string name="welcome_to_world_of_entertainment">Welcome to \nWorld of Entertainment!!</string>
+</resources>
