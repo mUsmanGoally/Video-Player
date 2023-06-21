@@ -12,7 +12,11 @@ class VideosFragment : Fragment() {
     private lateinit var binding: FragmentVideosBinding
     private lateinit var adapter: ShowAllVideosAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         binding = FragmentVideosBinding.inflate(layoutInflater)
         init()
         return binding.root
