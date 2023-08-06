@@ -42,8 +42,8 @@ class VideosFragment : Fragment() {
         adapter = VideosAdapter(requireContext(), MainActivity.videoList) { position ->
             val action =
                 VideosFragmentDirections.actionVideosFragmentToPlayerFragment(
-                    MainActivity.videoList[position],
-                    -1
+                    -1,
+                    position
                 )
             findNavController().navigate(action)
         }

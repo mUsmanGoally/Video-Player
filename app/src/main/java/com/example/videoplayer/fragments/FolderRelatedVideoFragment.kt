@@ -51,7 +51,8 @@ class FolderRelatedVideoFragment : Fragment() {
             ) { position ->
                 val action =
                     FolderRelatedVideoFragmentDirections.actionFolderRelatedVideoFragmentToPlayerFragment2(
-                        videoList[position], args.folderPosition
+                        args.folderPosition,
+                        position
                     )
                 findNavController().navigate(action)
             }
