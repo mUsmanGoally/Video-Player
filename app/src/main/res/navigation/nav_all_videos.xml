@@ -20,10 +20,10 @@
         android:label="fragment_player"
         tools:layout="@layout/fragment_player">
         <argument
-            android:name="videoData"
-            app:argType="com.example.videoplayer.models.VideoModel" />
-        <argument
             android:name="position"
+            app:argType="integer" />
+        <argument
+            android:name="actualPosition"
             app:argType="integer" />
     </fragment>
 </navigation>

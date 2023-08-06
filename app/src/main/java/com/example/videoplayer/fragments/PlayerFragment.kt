@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +22,8 @@ class PlayerFragment : Fragment() {
     private lateinit var binding: FragmentPlayerBinding
     private val args: PlayerFragmentArgs by navArgs()
     private lateinit var player: ExoPlayer
-    private var videoList: ArrayList<VideoModel> = ArrayList()
+    private var playerList: ArrayList<VideoModel> = ArrayList()
+    private var videoPosition = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,14 +36,13 @@ class PlayerFragment : Fragment() {
     }
 
     private fun init() {
+        videoPosition = args.actualPosition
         (requireActivity() as AppCompatActivity).supportActionBar?.hide()
-        videoList = if (args.position != -1) {
+        playerList = if (args.position != -1) {
             getAllVideos(MainActivity.foldersList[args.position].id)
         } else MainActivity.videoList
 
-        Log.d("TAG", "init: ${videoList.size}")
-
-        binding.tvVideoTitle.text = args.videoData.title
+        binding.tvVideoTitle.text = playerList[videoPosition].title
         binding.tvVideoTitle.isSelected = true
         createPlayer()
         setupListeners()
@@ -52,7 +51,7 @@ class PlayerFragment : Fragment() {
     private fun createPlayer() {
         player = ExoPlayer.Builder(requireContext()).build()
         binding.playerView.player = player
-        val mediaItem = MediaItem.fromUri(args.videoData.videoUri)
+        val mediaItem = MediaItem.fromUri(playerList[videoPosition].videoUri)
         player.setMediaItem(mediaItem)
         player.prepare()
         playVideo()
@@ -67,6 +66,14 @@ class PlayerFragment : Fragment() {
         binding.btnPlayPause.setOnClickListener {
             if (player.isPlaying) pauseVideo() else playVideo()
         }
+
+        binding.btnNext.setOnClickListener {
+            nextPrevVideo(true)
+        }
+
+        binding.btnPrev.setOnClickListener {
+            nextPrevVideo(false)
+        }
     }
 
     private fun playVideo() {
@@ -77,6 +84,26 @@ class PlayerFragment : Fragment() {
     private fun pauseVideo() {
         binding.btnPlayPause.setImageResource(R.drawable.ic_play)
         player.pause()
+    }
+
+    private fun nextPrevVideo(isNext: Boolean) {
+        if (isNext) setPosition(true)
+        else setPosition(false)
+        player.stop()
+        createPlayer()
+        binding.tvVideoTitle.text = playerList[videoPosition].title
+    }
+
+    private fun setPosition(isIncrement: Boolean) {
+        if (isIncrement) {
+            if (videoPosition == playerList.size - 1) {
+                videoPosition = 0
+            } else ++videoPosition
+        } else {
+            if (videoPosition == 0) {
+                videoPosition = playerList.size - 1
+            } else --videoPosition
+        }
     }
 
     override fun onDestroy() {
