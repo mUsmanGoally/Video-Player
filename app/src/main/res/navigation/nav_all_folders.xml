@@ -34,5 +34,8 @@
         <argument
             android:name="videoData"
             app:argType="com.example.videoplayer.models.VideoModel" />
+        <argument
+            android:name="position"
+            app:argType="integer" />
     </fragment>
 </navigation>

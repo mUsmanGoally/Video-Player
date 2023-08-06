@@ -51,7 +51,7 @@ class FolderRelatedVideoFragment : Fragment() {
             ) { position ->
                 val action =
                     FolderRelatedVideoFragmentDirections.actionFolderRelatedVideoFragmentToPlayerFragment2(
-                        videoList[position]
+                        videoList[position], args.folderPosition
                     )
                 findNavController().navigate(action)
             }
@@ -89,7 +89,8 @@ class FolderRelatedVideoFragment : Fragment() {
                         itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media.TITLE))
                     val size =
                         itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media.SIZE))
-                    val id = itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media._ID))
+                    val id =
+                        itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media._ID))
                     val folderName =
                         itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME))
                     val path =

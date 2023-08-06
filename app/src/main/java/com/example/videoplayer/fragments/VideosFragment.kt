@@ -41,7 +41,10 @@ class VideosFragment : Fragment() {
     private fun setAdapter() {
         adapter = VideosAdapter(requireContext(), MainActivity.videoList) { position ->
             val action =
-                VideosFragmentDirections.actionVideosFragmentToPlayerFragment(MainActivity.videoList[position])
+                VideosFragmentDirections.actionVideosFragmentToPlayerFragment(
+                    MainActivity.videoList[position],
+                    -1
+                )
             findNavController().navigate(action)
         }
         binding.rvTotalVideos.adapter = adapter
