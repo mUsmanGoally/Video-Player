@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("Recycle", "Range", "NotifyDataSetChanged")
     private fun getAllVideos() {
-        val folderTempList: ArrayList<String> = ArrayList()
+        val folderNameList: ArrayList<String> = ArrayList()
 
         val projection = arrayOf(
             MediaStore.Video.Media.TITLE,
@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Video.Media.DATE_ADDED + " DESC"
         )
 
-        cursor?.let { itCursor ->
+        cursor?.use { itCursor ->
             if (itCursor.moveToNext()) {
                 do {
                     val title =
@@ -173,8 +173,8 @@ class MainActivity : AppCompatActivity() {
                         val uri = Uri.fromFile(file)
                         val video = VideoModel(id, title, duration, folderName, size, path, uri)
 
-                        if (!folderTempList.contains(folderName)) {
-                            folderTempList.add(folderName)
+                        if (!folderNameList.contains(folderName)) {
+                            folderNameList.add(folderName)
                             foldersList.add(FolderModel(id = folderId, folderName = folderName))
                         }
 
@@ -186,7 +186,6 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 } while (itCursor.moveToNext())
-                itCursor.close()
             }
         }
     }

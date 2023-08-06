@@ -11,14 +11,19 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.videoplayer.R
 import com.example.videoplayer.databinding.ListItemVideoViewBinding
 import com.example.videoplayer.models.VideoModel
-import java.util.concurrent.TimeUnit
 
-class ShowAllVideosAdapter(
+class VideosAdapter(
     private val context: Context,
-    private val videosList: ArrayList<VideoModel>
-) : RecyclerView.Adapter<ShowAllVideosAdapter.ViewHolder>() {
+    private val videosList: ArrayList<VideoModel>,
+    val clickListener: ( position: Int) -> Unit
+) : RecyclerView.Adapter<VideosAdapter.ViewHolder>() {
 
     inner class ViewHolder(private val binding: ListItemVideoViewBinding) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.root.setOnClickListener {
+                clickListener(bindingAdapterPosition)
+            }
+        }
         @SuppressLint("SetTextI18n")
         fun bind(video: VideoModel) {
             with(binding) {

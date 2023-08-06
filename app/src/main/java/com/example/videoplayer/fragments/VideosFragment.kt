@@ -7,8 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.videoplayer.activities.MainActivity
-import com.example.videoplayer.adapter.ShowAllVideosAdapter
+import com.example.videoplayer.adapter.VideosAdapter
 import com.example.videoplayer.databinding.FragmentVideosBinding
 
 class VideosFragment : Fragment() {
@@ -16,7 +17,7 @@ class VideosFragment : Fragment() {
 
     companion object {
         @SuppressLint("StaticFieldLeak")
-        lateinit var adapter: ShowAllVideosAdapter
+        lateinit var adapter: VideosAdapter
     }
 
     override fun onCreateView(
@@ -31,13 +32,18 @@ class VideosFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun init() {
+        (requireActivity() as AppCompatActivity).supportActionBar?.show()
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "Video Player"
         binding.tvTotalVideos.text = "Total Videos: ${MainActivity.videoList.size}"
         setAdapter()
     }
 
     private fun setAdapter() {
-        adapter = ShowAllVideosAdapter(requireContext(), MainActivity.videoList)
+        adapter = VideosAdapter(requireContext(), MainActivity.videoList) { position ->
+            val action =
+                VideosFragmentDirections.actionVideosFragmentToPlayerFragment(MainActivity.videoList[position])
+            findNavController().navigate(action)
+        }
         binding.rvTotalVideos.adapter = adapter
     }
 

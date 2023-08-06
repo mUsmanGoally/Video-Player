@@ -3,20 +3,19 @@ package com.example.videoplayer.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.videoplayer.callback.SimpleCallback
 import com.example.videoplayer.databinding.ListItemFolderViewBinding
 import com.example.videoplayer.models.FolderModel
 
-class ShowAllFoldersAdapter(
+class FoldersAdapter(
     private val foldersList: ArrayList<FolderModel>,
-    private val simpleCallback: SimpleCallback
-) : RecyclerView.Adapter<ShowAllFoldersAdapter.ViewHolder>() {
+    private val listener: (position: Int) -> Unit
+) : RecyclerView.Adapter<FoldersAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ListItemFolderViewBinding) :
         RecyclerView.ViewHolder(binding.root) {
         init {
             binding.root.setOnClickListener {
-                simpleCallback.simpleCallback(adapterPosition)
+                listener(bindingAdapterPosition)
             }
         }
     }
