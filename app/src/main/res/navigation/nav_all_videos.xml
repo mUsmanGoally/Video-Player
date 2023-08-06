@@ -9,5 +9,18 @@
         android:id="@+id/videosFragment"
         android:name="com.example.videoplayer.fragments.VideosFragment"
         android:label="fragment_videos"
-        tools:layout="@layout/fragment_videos" />
+        tools:layout="@layout/fragment_videos">
+        <action
+            android:id="@+id/action_videosFragment_to_playerFragment"
+            app:destination="@id/playerFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/playerFragment"
+        android:name="com.example.videoplayer.fragments.PlayerFragment"
+        android:label="fragment_player"
+        tools:layout="@layout/fragment_player">
+        <argument
+            android:name="videoData"
+            app:argType="com.example.videoplayer.models.VideoModel" />
+    </fragment>
 </navigation>
