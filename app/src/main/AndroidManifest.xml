@@ -21,7 +21,6 @@
             android:name=".activities.MainActivity"
             android:configChanges="uiMode|orientation|screenSize|screenLayout"
             android:exported="true"
-            android:screenOrientation="fullSensor"
             android:theme="@style/MainActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
