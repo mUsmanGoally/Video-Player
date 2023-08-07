@@ -8,6 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.example.videoplayer.R
@@ -26,9 +29,7 @@ class PlayerFragment : Fragment() {
     private var videoPosition = 0
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentPlayerBinding.inflate(layoutInflater)
         init()
@@ -36,16 +37,30 @@ class PlayerFragment : Fragment() {
     }
 
     private fun init() {
+        initPlayerList()
+        setFullScreen()
         videoPosition = args.actualPosition
         (requireActivity() as AppCompatActivity).supportActionBar?.hide()
-        playerList = if (args.position != -1) {
-            getAllVideos(MainActivity.foldersList[args.position].id)
-        } else MainActivity.videoList
-
         binding.tvVideoTitle.text = playerList[videoPosition].title
         binding.tvVideoTitle.isSelected = true
         createPlayer()
         setupListeners()
+    }
+
+    private fun setFullScreen() {
+        activity?.window?.let { window ->
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+            WindowInsetsControllerCompat(
+                window,
+                binding.root
+            ).hide(WindowInsetsCompat.Type.systemBars())
+        }
+    }
+
+    private fun initPlayerList() {
+        playerList = if (args.position != -1) {
+            getAllVideos(MainActivity.foldersList[args.position].id)
+        } else MainActivity.videoList
     }
 
     private fun createPlayer() {
@@ -142,8 +157,7 @@ class PlayerFragment : Fragment() {
                         itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media.TITLE))
                     val size =
                         itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media.SIZE))
-                    val id =
-                        itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media._ID))
+                    val id = itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media._ID))
                     val folderName =
                         itCursor.getString(itCursor.getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME))
                     val path =
@@ -157,8 +171,7 @@ class PlayerFragment : Fragment() {
                         val uri = Uri.fromFile(file)
                         val video = VideoModel(id, title, duration, folderName, size, path, uri)
 
-                        if (file.exists())
-                            videoList.add(video)
+                        if (file.exists()) videoList.add(video)
 
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -168,6 +181,16 @@ class PlayerFragment : Fragment() {
             }
         }
         return videoList
+    }
+
+    override fun onPause() {
+        super.onPause()
+        player.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        player.play()
     }
 
 }
