@@ -17,8 +17,11 @@ import com.example.videoplayer.R
 import com.example.videoplayer.activities.MainActivity
 import com.example.videoplayer.databinding.FragmentPlayerBinding
 import com.example.videoplayer.models.VideoModel
+import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import java.io.File
 
 class PlayerFragment : Fragment() {
@@ -27,6 +30,8 @@ class PlayerFragment : Fragment() {
     private lateinit var player: ExoPlayer
     private var playerList: ArrayList<VideoModel> = ArrayList()
     private var videoPosition = 0
+    private var repeatVideo: Boolean = false
+    private var isFullScreen: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -36,7 +41,11 @@ class PlayerFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("PrivateResource")
     private fun init() {
+        if (repeatVideo) {
+            binding.btnRepeat.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_all)
+        } else binding.btnRepeat.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_off)
         initPlayerList()
         setFullScreen()
         videoPosition = args.actualPosition
@@ -45,6 +54,39 @@ class PlayerFragment : Fragment() {
         binding.tvVideoTitle.isSelected = true
         createPlayer()
         setupListeners()
+    }
+
+    private fun createPlayer() {
+        try {
+            player.release()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        player = ExoPlayer.Builder(requireContext()).build()
+        binding.playerView.player = player
+        val mediaItem = MediaItem.fromUri(playerList[videoPosition].videoUri)
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        playVideo()
+        player.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+                if (playbackState == Player.STATE_ENDED) nextPrevVideo(true)
+            }
+        })
+        playInFullScreen(isFullScreen)
+    }
+
+    private fun playInFullScreen(enable: Boolean) {
+        if (enable) {
+            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+            player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+            binding.btnFullScreen.setImageResource(R.drawable.ic_fullscreen_exit)
+        } else {
+            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+            binding.btnFullScreen.setImageResource(R.drawable.ic_fullscreen)
+        }
     }
 
     private fun setFullScreen() {
@@ -63,15 +105,7 @@ class PlayerFragment : Fragment() {
         } else MainActivity.videoList
     }
 
-    private fun createPlayer() {
-        player = ExoPlayer.Builder(requireContext()).build()
-        binding.playerView.player = player
-        val mediaItem = MediaItem.fromUri(playerList[videoPosition].videoUri)
-        player.setMediaItem(mediaItem)
-        player.prepare()
-        playVideo()
-    }
-
+    @SuppressLint("PrivateResource")
     private fun setupListeners() {
         binding.btnBack.setOnClickListener {
             player.stop()
@@ -89,6 +123,28 @@ class PlayerFragment : Fragment() {
         binding.btnPrev.setOnClickListener {
             nextPrevVideo(false)
         }
+
+        binding.btnRepeat.setOnClickListener {
+            if (repeatVideo) {
+                repeatVideo = false
+                player.repeatMode = Player.REPEAT_MODE_OFF
+                binding.btnRepeat.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_one)
+            } else {
+                repeatVideo = true
+                player.repeatMode = Player.REPEAT_MODE_ONE
+                binding.btnRepeat.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_all)
+            }
+        }
+
+        binding.btnFullScreen.setOnClickListener {
+            if (isFullScreen) {
+                isFullScreen = false
+                playInFullScreen(false)
+            } else {
+                isFullScreen = true
+                playInFullScreen(true)
+            }
+        }
     }
 
     private fun playVideo() {
@@ -102,22 +158,21 @@ class PlayerFragment : Fragment() {
     }
 
     private fun nextPrevVideo(isNext: Boolean) {
-        if (isNext) setPosition(true)
-        else setPosition(false)
-        player.stop()
-        createPlayer()
-        binding.tvVideoTitle.text = playerList[videoPosition].title
-    }
+        if (!repeatVideo) {
+            when (isNext) {
+                true -> {
+                    if (videoPosition == playerList.size - 1) {
+                        videoPosition = 0
+                    } else ++videoPosition
+                }
 
-    private fun setPosition(isIncrement: Boolean) {
-        if (isIncrement) {
-            if (videoPosition == playerList.size - 1) {
-                videoPosition = 0
-            } else ++videoPosition
-        } else {
-            if (videoPosition == 0) {
-                videoPosition = playerList.size - 1
-            } else --videoPosition
+                false -> {
+                    if (videoPosition == 0) {
+                        videoPosition = playerList.size - 1
+                    } else --videoPosition
+                }
+            }
+            createPlayer()
         }
     }
 
