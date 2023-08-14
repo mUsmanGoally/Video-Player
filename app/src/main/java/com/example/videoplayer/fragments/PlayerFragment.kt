@@ -3,6 +3,8 @@ package com.example.videoplayer.fragments
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
@@ -32,6 +34,8 @@ class PlayerFragment : Fragment() {
     private var videoPosition = 0
     private var repeatVideo: Boolean = false
     private var isFullScreen: Boolean = false
+    private lateinit var runnable: Runnable
+    private var isLocked: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -43,9 +47,7 @@ class PlayerFragment : Fragment() {
 
     @SuppressLint("PrivateResource")
     private fun init() {
-        if (repeatVideo) {
-            binding.btnRepeat.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_all)
-        } else binding.btnRepeat.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_off)
+        setRepeatBtnImages()
         initPlayerList()
         setFullScreen()
         videoPosition = args.actualPosition
@@ -54,6 +56,12 @@ class PlayerFragment : Fragment() {
         binding.tvVideoTitle.isSelected = true
         createPlayer()
         setupListeners()
+    }
+
+    private fun initPlayerList() {
+        playerList = if (args.position != -1) {
+            getAllVideos(MainActivity.foldersList[args.position].id)
+        } else MainActivity.videoList
     }
 
     private fun createPlayer() {
@@ -75,37 +83,10 @@ class PlayerFragment : Fragment() {
             }
         })
         playInFullScreen(isFullScreen)
+        setVisibility()
     }
 
-    private fun playInFullScreen(enable: Boolean) {
-        if (enable) {
-            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
-            player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-            binding.btnFullScreen.setImageResource(R.drawable.ic_fullscreen_exit)
-        } else {
-            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-            player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
-            binding.btnFullScreen.setImageResource(R.drawable.ic_fullscreen)
-        }
-    }
-
-    private fun setFullScreen() {
-        activity?.window?.let { window ->
-            WindowCompat.setDecorFitsSystemWindows(window, true)
-            WindowInsetsControllerCompat(
-                window,
-                binding.root
-            ).hide(WindowInsetsCompat.Type.systemBars())
-        }
-    }
-
-    private fun initPlayerList() {
-        playerList = if (args.position != -1) {
-            getAllVideos(MainActivity.foldersList[args.position].id)
-        } else MainActivity.videoList
-    }
-
-    @SuppressLint("PrivateResource")
+    @SuppressLint("PrivateResource", "ClickableViewAccessibility")
     private fun setupListeners() {
         binding.btnBack.setOnClickListener {
             player.stop()
@@ -145,6 +126,48 @@ class PlayerFragment : Fragment() {
                 playInFullScreen(true)
             }
         }
+
+        binding.btnLock.setOnClickListener {
+            if (!isLocked) {
+                isLocked = true
+                binding.playerView.hideController()
+                binding.playerView.useController = false
+                binding.btnLock.setImageResource(R.drawable.ic_closed_lock)
+            } else {
+                isLocked = false
+                binding.playerView.showController()
+                binding.playerView.useController = true
+                binding.btnLock.setImageResource(R.drawable.ic_lock_open)
+            }
+        }
+    }
+
+    private fun setRepeatBtnImages() {
+        if (repeatVideo) {
+            binding.btnRepeat.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_all)
+        } else binding.btnRepeat.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_off)
+    }
+
+    private fun setFullScreen() {
+        activity?.window?.let { window ->
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+            WindowInsetsControllerCompat(
+                window,
+                binding.root
+            ).hide(WindowInsetsCompat.Type.systemBars())
+        }
+    }
+
+    private fun playInFullScreen(enable: Boolean) {
+        if (enable) {
+            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+            player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+            binding.btnFullScreen.setImageResource(R.drawable.ic_fullscreen_exit)
+        } else {
+            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+            binding.btnFullScreen.setImageResource(R.drawable.ic_fullscreen)
+        }
     }
 
     private fun playVideo() {
@@ -176,9 +199,24 @@ class PlayerFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        player.release()
+    private fun setVisibility() {
+        runnable = Runnable {
+            if (binding.playerView.isControllerVisible) {
+                showHidePlayerControls(View.VISIBLE)
+            } else {
+                showHidePlayerControls(View.INVISIBLE)
+            }
+            Handler(Looper.getMainLooper()).postDelayed(runnable, 300)
+        }
+        Handler(Looper.getMainLooper()).postDelayed(runnable, 0)
+    }
+
+    private fun showHidePlayerControls(visibility: Int) {
+        binding.layoutTopController.visibility = visibility
+        binding.layoutBottomController.visibility = visibility
+        binding.btnPlayPause.visibility = visibility
+        if (isLocked) binding.layoutLock.visibility = View.VISIBLE
+        else binding.layoutLock.visibility = visibility
     }
 
     @SuppressLint("Recycle", "Range", "NotifyDataSetChanged")
@@ -246,6 +284,15 @@ class PlayerFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         player.play()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            player.release()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
 }
